@@ -1,0 +1,36 @@
+.dropdown {
+  display: block;
+  background-color: #fff;
+  box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.12), 0 2px 6px 0 rgba(0, 0, 0, 0.12);
+  position: relative;
+  width: 300px;
+  font-size: 30px;
+  text-transform: uppercase;
+  text-align: center;
+  cursor: pointer;
+}
+
+.dropdownItem:hover {
+  background: rgba(0, 0, 0, 0.10);
+}
+
+.dropdownButton {
+  border: 0;
+  font-size: 30px;
+  padding: 30px;
+  width: 300px;
+  outline: none;
+  background: transparent;
+  border: 4px solid black;
+  cursor: pointer;
+}
+
+.dropdownButton:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.dropdownContainer {
+  margin: 25% auto;
+  height: 100px;
+  width: 300px;
+}
