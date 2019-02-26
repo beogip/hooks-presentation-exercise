@@ -36,7 +36,7 @@ function usePopOver(){
 
 export default function Dropdown(){
   const [isOpen, setIsOpen] = usePopOver()
-  const [currentColor, setCurrentColor] = useState('white')
+  const [currentColor, setCurrentColor] = useState('#ffffff')
   const [currentColorName, setCurrentColorName] = useState('White')
 
   function renderItems(){
