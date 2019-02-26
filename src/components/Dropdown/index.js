@@ -1,91 +1,71 @@
-import React from 'react'
+import React, {useEffect, useState} from 'react'
 import styles from './Dropdown.module.scss'
 import {getColorName} from '../../api'
+const colorOptions = ['#3bcebe', '#3b95ce', '#3bce75', '#ce3b4b']
 
-export default class Dropdown extends React.Component {
-  constructor() {
-    super()
-    this.state = {
-      dropdownIsOpen: false,
-      currentColor: 'white',
-      currentColorName: 'White',
-      colorOptions: ['#3bcebe', '#3b95ce', '#3bce75', '#ce3b4b']
+function useKeydown(key, callback){
+  function onEscapeKeyDown(e) {
+    if (e.key !== key) return
+    callback()
+  }
+  useEffect(() => {
+    window.addEventListener('keydown', onEscapeKeyDown)
+    return () => {
+      window.removeEventListener('keydown', onEscapeKeyDown)
     }
+  }, [])
+}
 
-    this.renderItems = this.renderItems.bind(this)
-    this.onColorClick = this.onColorClick.bind(this)
-    this.onEscapeKeyDown = this.onEscapeKeyDown.bind(this)
-    this.onDropdownButtonClick = this.onDropdownButtonClick.bind(this)
-    this.fetchColorName = this.fetchColorName.bind(this)
+async function fetchColorName(color, setCurrentColor) {
+  try {
+    const currentColorName = await getColorName(color)
+    setCurrentColor(currentColorName)
+  } catch (error) {
+    console.error(error)
   }
+}
 
-  componentDidMount() {
-    const {currentColor, currentColorName} = this.state
-    document.body.style.backgroundColor = currentColor
-    document.title = currentColorName
-    window.addEventListener('keydown', this.onEscapeKeyDown)
-  }
+function usePopOver(){
+  const [isOpen, setIsOpen] = useState(false)
+  useKeydown('Escape', ()=>{
+    setIsOpen(false)
+  })
 
-  componentDidUpdate(nextProps, nextState) {
-    const {currentColor, currentColorName} = this.state
-    if (nextState.currentColor !== currentColor) {
-      document.body.style.backgroundColor = currentColor
-      this.fetchColorName(currentColor)
-    }
+  return [isOpen, setIsOpen]
+}
 
-    if (nextState.currentColorName !== currentColorName) {
-      document.title = currentColorName
-    }
-  }
+export default function Dropdown(){
+  const [isOpen, setIsOpen] = usePopOver()
+  const [currentColor, setCurrentColor] = useState('white')
+  const [currentColorName, setCurrentColorName] = useState('White')
 
-  componentWillUnmount() {
-    window.removeEventListener('keydown', this.onEscapeKeyDown)
-  }
-
-  onEscapeKeyDown(e) {
-    if (e.key !== 'Escape') return
-    this.setState({
-      dropdownIsOpen: false
-    })
-  }
-
-  async fetchColorName(color) {
-    try {
-      const currentColorName = await getColorName(color)
-      this.setState({currentColorName})
-    } catch (error) {
-      console.error(error)
-    }
-  }
-
-  onDropdownButtonClick() {
-    this.setState(prevState => ({
-      dropdownIsOpen: !prevState.dropdownIsOpen
-    }))
-  }
-
-  onColorClick(currentColor) {
-    this.setState({currentColor, dropdownIsOpen: false})
-  }
-
-  renderItems() {
-    const {colorOptions} = this.state
+  function renderItems(){
     return colorOptions.map((color, i) => (
-      <div key={i} className={styles.dropdownItem} onClick={() => this.onColorClick(color)}>
+      <div key={i} className={styles.dropdownItem} onClick={() => {
+        setCurrentColor(color)
+        setIsOpen(false)
+      }}>
         {color}
       </div>
     ))
   }
 
-  render() {
-    const {dropdownIsOpen} = this.state
-    return (
-      <div className={styles.dropdownContainer}>
-        <button className={styles.dropdownButton} onClick={this.onDropdownButtonClick}>
-          Change color
-        </button>
-        {dropdownIsOpen && <div className={styles.dropdown}>{this.renderItems()}</div>}
-      </div>
-    )
-  }
+  useEffect(() => {
+    document.body.style.backgroundColor = currentColor
+    fetchColorName(currentColor, setCurrentColorName)
+  }, [currentColor])
+
+  useEffect(() => {
+    document.title = currentColorName
+  }, [currentColorName])
+
+  return (
+    <div className={styles.dropdownContainer}>
+      <button className={styles.dropdownButton} onClick={()=> {setIsOpen(!isOpen)}}>
+        Change color
+      </button>
+      {isOpen && <div className={styles.dropdown}>{renderItems()}</div>}
+    </div>
+  )
 }
+
